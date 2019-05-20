@@ -8,6 +8,7 @@
     TF Example data format
 *   Added a generic ExampleGen component to reduce the work of custom ExampleGen
 *   Release Python 3 type hints.
+*   Added Parquet executor for ExampleGen component.
 
 ## Bug fixes and other changes
 *   Declared 'cmle_training_args' on trainer and 'cmle_serving_args' on
