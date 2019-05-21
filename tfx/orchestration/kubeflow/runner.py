@@ -21,12 +21,12 @@ import os
 
 from kfp import compiler
 from kfp import dsl
-from typing import Optional, Text
+from typing import Dict, Optional, Text
 
-from tfx.components.base import base_component as tfx_base_component
 from tfx.orchestration import pipeline as tfx_pipeline
 from tfx.orchestration import tfx_runner
 from tfx.orchestration.kubeflow import base_component
+from tfx.utils import channel as tfx_channel
 
 
 class KubeflowRunner(tfx_runner.TfxRunner):
@@ -44,8 +44,8 @@ class KubeflowRunner(tfx_runner.TfxRunner):
     """
     self._output_dir = output_dir or os.getcwd()
 
-  def _prepare_output_dict(self, outputs: tfx_base_component.ComponentOutputs):
-    return dict((k, v.get()) for k, v in outputs.get_all().items())
+  def _prepare_output_dict(self, outputs: Dict[Text, tfx_channel.Channel]):
+    return dict((k, v.get()) for k, v in outputs.items())
 
   def _construct_pipeline_graph(self, pipeline: tfx_pipeline.Pipeline):
     """Constructs a Kubeflow Pipeline graph.
@@ -81,7 +81,7 @@ class KubeflowRunner(tfx_runner.TfxRunner):
     # in the list.
     for component in pipeline.components:
       input_dict = {}
-      for input_name, input_channel in component.input_dict.items():
+      for input_name, input_channel in component.inputs.items():
         if input_channel in producers:
           output = getattr(producers[input_channel]['component'].outputs,
                            producers[input_channel]['channel_name'])
@@ -104,7 +104,7 @@ class KubeflowRunner(tfx_runner.TfxRunner):
           executor_class_path=executor_class_path,
           pipeline_properties=pipeline_properties)
 
-      for channel_name, channel in component.outputs.get_all().items():
+      for channel_name, channel in component.outputs.items():
         producers[channel] = {}
         producers[channel]['component'] = kfp_component
         producers[channel]['channel_name'] = channel_name

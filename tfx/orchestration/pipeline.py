@@ -95,13 +95,13 @@ class Pipeline(object):
 
     # Fills in producer map.
     for component in deduped_components:
-      for o in component.outputs.get_all().values():
+      for o in component.outputs.values():
         assert not producer_map.get(0), '{} produced more than once'.format(o)
         producer_map[o] = component
 
     # Connects nodes based on producer map.
     for component in deduped_components:
-      for i in component.input_dict.values():
+      for i in component.inputs.values():
         if producer_map.get(i):
           component.add_upstream_node(producer_map[i])
           producer_map[i].add_downstream_node(component)

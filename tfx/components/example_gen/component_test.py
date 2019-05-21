@@ -40,7 +40,7 @@ class TestExampleGenComponent(component.ExampleGen):
                input_config=None,
                output_config=None,
                name=None,
-               outputs=None):
+               example_artifacts=None):
     super(TestExampleGenComponent, self).__init__(
         executor=TestExampleGenExecutor,
         input_base=input_base,
@@ -48,7 +48,7 @@ class TestExampleGenComponent(component.ExampleGen):
         output_config=output_config,
         component_name='TestExampleGenComponent',
         unique_name=name,
-        outputs=outputs)
+        example_artifacts=example_artifacts)
 
 
 class ComponentTest(tf.test.TestCase):
@@ -58,10 +58,10 @@ class ComponentTest(tf.test.TestCase):
     example_gen = component.ExampleGen(
         executor=TestExampleGenExecutor,
         input_base=channel.as_channel([input_base]))
-    self.assertIn('input-base', example_gen.input_dict)
+    self.assertIn('input_base', example_gen.inputs)
     self.assertEqual(driver.Driver, example_gen.driver)
-    self.assertEqual('ExamplesPath', example_gen.outputs.examples.type_name)
-    artifact_collection = example_gen.outputs.examples.get()
+    self.assertEqual('ExamplesPath', example_gen.outputs['examples'].type_name)
+    artifact_collection = example_gen.outputs['examples'].get()
     self.assertEqual('train', artifact_collection[0].split)
     self.assertEqual('eval', artifact_collection[1].split)
 
@@ -69,8 +69,8 @@ class ComponentTest(tf.test.TestCase):
     input_base = types.TfxArtifact(type_name='ExternalPath')
     example_gen = TestExampleGenComponent(
         input_base=channel.as_channel([input_base]))
-    self.assertEqual('ExamplesPath', example_gen.outputs.examples.type_name)
-    artifact_collection = example_gen.outputs.examples.get()
+    self.assertEqual('ExamplesPath', example_gen.outputs['examples'].type_name)
+    artifact_collection = example_gen.outputs['examples'].get()
     self.assertEqual('train', artifact_collection[0].split)
     self.assertEqual('eval', artifact_collection[1].split)
 
@@ -85,8 +85,8 @@ class ComponentTest(tf.test.TestCase):
                 example_gen_pb2.SplitConfig.Split(name='eval', hash_buckets=1),
                 example_gen_pb2.SplitConfig.Split(name='test', hash_buckets=1)
             ])))
-    self.assertEqual('ExamplesPath', example_gen.outputs.examples.type_name)
-    artifact_collection = example_gen.outputs.examples.get()
+    self.assertEqual('ExamplesPath', example_gen.outputs['examples'].type_name)
+    artifact_collection = example_gen.outputs['examples'].get()
     self.assertEqual('train', artifact_collection[0].split)
     self.assertEqual('eval', artifact_collection[1].split)
     self.assertEqual('test', artifact_collection[2].split)
@@ -101,8 +101,8 @@ class ComponentTest(tf.test.TestCase):
             example_gen_pb2.Input.Split(name='eval', pattern='eval/*'),
             example_gen_pb2.Input.Split(name='test', pattern='test/*')
         ]))
-    self.assertEqual('ExamplesPath', example_gen.outputs.examples.type_name)
-    artifact_collection = example_gen.outputs.examples.get()
+    self.assertEqual('ExamplesPath', example_gen.outputs['examples'].type_name)
+    artifact_collection = example_gen.outputs['examples'].get()
     self.assertEqual('train', artifact_collection[0].split)
     self.assertEqual('eval', artifact_collection[1].split)
     self.assertEqual('test', artifact_collection[2].split)
@@ -113,10 +113,10 @@ class ComponentTest(tf.test.TestCase):
         input_config=example_gen_pb2.Input(splits=[
             example_gen_pb2.Input.Split(name='single', pattern='query'),
         ]))
-    self.assertEqual({}, example_gen.input_dict)
+    self.assertEqual({}, example_gen.inputs)
     self.assertEqual(base_driver.BaseDriver, example_gen.driver)
-    self.assertEqual('ExamplesPath', example_gen.outputs.examples.type_name)
-    artifact_collection = example_gen.outputs.examples.get()
+    self.assertEqual('ExamplesPath', example_gen.outputs['examples'].type_name)
+    artifact_collection = example_gen.outputs['examples'].get()
     self.assertEqual('train', artifact_collection[0].split)
     self.assertEqual('eval', artifact_collection[1].split)
 
