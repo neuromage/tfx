@@ -36,7 +36,7 @@ class ExecutorTest(tf.test.TestCase):
     # Create input dict.
     input_base = types.TfxArtifact(type_name='ExternalPath')
     input_base.uri = os.path.join(input_data_dir, 'external')
-    self._input_dict = {'input-base': [input_base]}
+    self._input_dict = {'input_base': [input_base]}
 
   def testCsvToExample(self):
     with beam.Pipeline() as pipeline:
